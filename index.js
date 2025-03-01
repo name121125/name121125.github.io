@@ -1,7 +1,6 @@
 // 初始化地圖
 // const map = L.map('map').setView([25.079696, 121.545240], 17);  // 台北 101 的座標
 const MIN_ZOOM_TO_FETCH = 15;
-let markers = [];
 var busStops_collect = L.layerGroup();
 
 //地圖圖磚定義
@@ -66,13 +65,10 @@ async function updateBusStops() {
         iconUrl: 'bus.1014x1024.png', 
         iconSize: [25, 25]
     })
-    markers.forEach(markers => map.removeLayer(markers));
-    markers = [];
+    
     busStops.forEach(stop => {
         let marker = L.marker([stop.lat, stop.lon], {icon: busIcon, nodeID: stop.id})
-            .addTo(map)
             .bindPopup(stop.tags.name || "公車站");
-        markers.push(marker);
         busStops_collect.addLayer(marker);
     });
 }
@@ -81,12 +77,6 @@ async function updateBusStops() {
 let fetchTimeout;
 
 map.on("moveend", () => {
-    let zoom = map.getZoom();
-   
-    if (zoom < MIN_ZOOM_TO_FETCH) {
-        busStops_collect.clearLayers();
-        return;
-    }
     clearTimeout(fetchTimeout); // 清除上次的計時器
     fetchTimeout = setTimeout(updateBusStops, 500); // 0.5 秒內只執行最後一次
 });

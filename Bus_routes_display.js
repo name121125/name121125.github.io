@@ -13,20 +13,20 @@ async function getBusRoutes(BusNode) {
 }
 // 點擊事件
 map.on("click", async function(e) {
+    console.log("Map clicked at:", e.latlng); 
     let clickedStop = null;
     let clickedNodeID = null;
 
     markers.forEach(marker => {
-        if (marker.getLatLng().distanceTo(e.latlng) < 2) {
+        if (marker.getLatLng().distanceTo(e.latlng) < 20) {
             clickedStop = marker;
             clickedNodeID = marker.options.nodeID;
         }
-        alert(clickedNodeID);
     })
 
     if (clickedStop && clickedNodeID) {
         let routes = await getBusRoutes(clickedNodeID);
-        let routeNames = routes.map(route => route.tags.ref || "未知編號").join(", ");
+        let routeNames = routes.map(route => route.tags.name || "未知編號").join(", ");
 
         clickedStop.bindPopup(`經過的公車路線: ${routeNames}`).openPopup();
     }

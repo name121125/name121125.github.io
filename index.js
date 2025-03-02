@@ -50,6 +50,7 @@ async function fetchBusStops() {
     let response = await fetch(url);
     let data = await response.json();
     return data.elements;
+    
 }
 
 async function updateBusStops() {
@@ -68,10 +69,36 @@ async function updateBusStops() {
     
     busStops.forEach(stop => {
         let marker = L.marker([stop.lat, stop.lon], {icon: busIcon, nodeID: stop.id})
-            .bindPopup(stop.tags.name || "公車站");
+            .bindPopup((stop.tags.name || "公車站") + ("<br />路線處理中..."))
+
+            // 點擊事件
+            .on("click", async function(e) {
+
+                let clickedNodeID = marker.options.nodeID;
+                let routes = await getBusRoutes(clickedNodeID);
+                // 偵錯用
+                console.log("完整的 Overpass API 回應:", routes);
+                console.log("elements 的內容:", routes.elements);
+                console.log("elements 的類型:", typeof routes.elements);
+                if (!routes || !routes.elements) {
+                    console.error("API 沒有回傳 elements！請檢查 API 查詢條件或請求方式。");
+                } else {
+                    console.log("API 回傳成功，繼續處理資料...");
+                }
+                
+
+                let routeNames = routes.elements
+                .filter(element => element.type === "relation" && element.tags?.name) // 只篩選 relation
+                .map(relation => relation.tags?.name || "未知編號").join("<br />");
+            
+                marker.setPopupContent((stop.tags.name || "公車站") + (`<br />經過的公車路線: <br /> ${routeNames}`)).openPopup();
+                
+            });
+            
         busStops_collect.addLayer(marker);
     });
 }
+
 
 
 let fetchTimeout;
@@ -82,3 +109,5 @@ map.on("moveend", () => {
 });
 
 updateBusStops();  // 初始化時加載公車站
+
+

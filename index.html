@@ -45,15 +45,23 @@
                 <a class="nav-link disabled">Disabled</a>
               </li>
             </ul>
-            <form class="d-flex">
+            <form class="d-flex" id="search">
               <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search">
-              <button class="btn btn-outline-success" type="submit">Search</button>
+              <button class="btn btn-outline-success" onclick="search()" type="button">Search</button>
             </form>
           </div>
         </div>
       </nav>
     <div id="map"></div> 
+    
     <script src="index.js"></script>
     <script src="Bus_routes_display.js" defer></script>
+    <script src="Search_place.js"></script>
+    <script>
+      function search() {
+        let test = document.querySelector("#search input").value;
+        search_place(test);
+      }
+    </script>
 </body>
 </html>

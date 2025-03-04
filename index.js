@@ -40,7 +40,7 @@ var overlayMaps = {
     "Bus stops": busStops_collect
 };
 const layerControl = L.control.layers(baseMaps, overlayMaps).addTo(map);
-
+//使用overpass api抓取公車站點資料
 async function fetchBusStops() {
     let bounds = map.getBounds();
     let bbox = `${bounds.getSouth()},${bounds.getWest()},${bounds.getNorth()},${bounds.getEast()}`;

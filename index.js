@@ -92,6 +92,15 @@ async function updateBusStops() {
                 .map(relation => relation.tags?.name || "未知編號").join("<br />");
             
                 marker.setPopupContent((stop.tags.name || "公車站") + (`<br />經過的公車路線: <br /> ${routeNames}`)).openPopup();
+
+                routes.elements.forEach(element => {
+                    let coords = element.filter(route_display => route_display.type === "way")
+                    coords.map(coord => [coord.lat, coord.lon]);
+                    console.log(coords);
+                    L.polyline(coords, { color: "blue", weight: 3}).addTo(map);
+                    console.log("success");
+                    
+                });
                 
             });
             

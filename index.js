@@ -89,10 +89,14 @@ async function updateBusStops() {
 
                 let routeNames = routes.elements
                 .filter(element => element.type === "relation" && element.tags?.name) // 只篩選 relation
-                .map(relation => relation.tags?.name || "未知編號").join("<br />");
-            
-                marker.setPopupContent((stop.tags.name || "公車站") + (`<br />經過的公車路線: <br /> ${routeNames}`)).openPopup();
-          
+                .map(relation => relation.tags?.name || "未知編號");
+                console.log(routeNames);
+                let PopupContent = (stop.tags.name || "公車站") + (`<br />經過的公車路線: <br /> `);
+                routeNames.forEach(routeName => {
+                    PopupContent += (`<a href="javascript:void(0);" onclick="routeDisplay('${routeName}')">${routeName}</a> <br />`);
+                });
+                marker.setPopupContent(PopupContent);
+                marker.openPopup();
             });
             
         busStops_collect.addLayer(marker);

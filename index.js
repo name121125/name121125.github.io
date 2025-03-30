@@ -39,6 +39,7 @@ var baseMaps = {
 var overlayMaps = {
     "Bus stops": busStops_collect
 };
+var BusrouteLayer = null; // 初始化 BusrouteLayer 變數
 const layerControl = L.control.layers(baseMaps, overlayMaps).addTo(map);
 //使用overpass api抓取公車站點資料
 async function fetchBusStops() {

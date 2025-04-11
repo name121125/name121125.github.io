@@ -42,6 +42,13 @@ var overlayMaps = {
 var BusrouteLayer = null; // 初始化 BusrouteLayer 變數
 const layerControl = L.control.layers(baseMaps, overlayMaps).addTo(map);
 //使用overpass api抓取公車站點資料
+var sidebar = L.control.sidebar({
+    autopan: false, 
+    closeButton: true,
+    container: 'sidebar',
+    position: 'left',
+}).addTo(map); // 側邊欄
+
 async function fetchBusStops() {
     let bounds = map.getBounds();
     let bbox = `${bounds.getSouth()},${bounds.getWest()},${bounds.getNorth()},${bounds.getEast()}`;
@@ -97,6 +104,9 @@ async function updateBusStops() {
                     PopupContent += (`<a href="javascript:void(0);" onclick="routeDisplay('${routeName}')">${routeName}</a> <br />`);
                 });
                 marker.setPopupContent(PopupContent);
+                document.getElementById('busroutes_sidebar').innerHTML = `<h2>${stop.tags.name || "公車站"}</h2>` + PopupContent;
+                
+                // sidebar.show(panelContent.id);
                 marker.openPopup();
             });
             

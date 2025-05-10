@@ -17,8 +17,9 @@ async function routeDisplay(route_name) {
     console.log(route_name);
     let query = `[out:json][timeout:25];
         area(id:3601293250)->.searchArea;
-        relation["name"='${route_name}'];  
-        out geom;`;
+        nwr["name"='${route_name}'];  
+        (._;>;);
+        out;`;
     let url = `https://overpass-api.de/api/interpreter?data=${query}`;
     console.log(url);
     let response = await fetch(url);
@@ -26,9 +27,11 @@ async function routeDisplay(route_name) {
     console.log(data);
     const Busroute_geojson_data = osmtogeojson(data);
     console.log(Busroute_geojson_data);
+    console.log(Busroute_geojson_data.features[0].name);
     if (BusrouteLayer != null) {
         BusrouteLayer.clearLayers(); // 清除舊的圖層
     }
+
     BusrouteLayer = L.geoJSON(Busroute_geojson_data, {
         style: function (feature) {
             switch (feature.geometry.type) {
@@ -39,15 +42,26 @@ async function routeDisplay(route_name) {
                         opacity: 0.7
 
                     };
-                    case 'LineString':
+                case 'LineString':
                         return {
                             color: "red",
                             weight: 3,
                             opacity: 0.7
                     };
-            }    
+                
+            }
+        },
+        pointToLayer: function (feature, latlng) {
+            if (feature.geometry.type === 'Point') {
+                if (feature.properties && feature.properties.name) {
+                    let marker = new L.Marker(latlng).addTo(map);
+                    marker.bindPopup(feature.properties.name);
+                    return marker;
+                };
+            };
         }
     })
+    setSidebarContent(Busroute_geojson_data.features[0].properties);
     BusrouteLayer.addTo(map);
     map.fitBounds(BusrouteLayer.getBounds()); // 調整地圖視野以適應路線
 
@@ -60,4 +74,13 @@ async function routeDisplay(route_name) {
         console.log("success");
         
     }); */
+}
+
+async function setSidebarContent(Busroute_tags) {
+    let sidebarContent = document.getElementById("sidebar-content");
+    let sidebarTitle = document.getElementById("sidebar-title");
+    sidebarTitle.innerHTML = Busroute_tags.name || "公車路線";
+    sidebarContent.innerHTML = `${Busroute_tags.network} ${Busroute_tags.operator} ${Busroute_tags.ref}<br /> From: ${Busroute_tags.from} <br /> To: ${Busroute_tags.to}`;   
+    sidebar.open('businfo_sidebar');
+    console.log("setSidebarContent");
 }

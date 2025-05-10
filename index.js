@@ -1,6 +1,6 @@
 // 初始化地圖
 // const map = L.map('map').setView([25.079696, 121.545240], 17);  // 台北 101 的座標
-const MIN_ZOOM_TO_FETCH = 15;
+const MIN_ZOOM_TO_FETCH = 16;
 var busStops_collect = L.layerGroup();
 
 //地圖圖磚定義
@@ -20,16 +20,6 @@ var Positron = L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/
     maxZoom: 20
 });
 
-
-var map = L.map('map', {layers: [voyager, busStops_collect]}).setView([25.079696, 121.545240], 17); // 台北 101 的座標 & 新增layers
-
-// 使用 Carto Positron 作為底圖
-/* L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
-    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/">CARTO</a>',
-    subdomains: 'abcd',
-    maxZoom: 20
-}).addTo(map); */
-
 var baseMaps = {
     "Voyager": voyager, 
     "OpenStreetMap": osm, 
@@ -39,90 +29,14 @@ var baseMaps = {
 var overlayMaps = {
     "Bus stops": busStops_collect
 };
-var BusrouteLayer = null; // 初始化 BusrouteLayer 變數
-const layerControl = L.control.layers(baseMaps, overlayMaps).addTo(map);
-//使用overpass api抓取公車站點資料
-var sidebar = L.control.sidebar({
-    autopan: false, 
-    closeButton: true,
-    container: 'sidebar',
-    position: 'left',
-}).addTo(map); // 側邊欄
 
-async function fetchBusStops() {
-    let bounds = map.getBounds();
-    let bbox = `${bounds.getSouth()},${bounds.getWest()},${bounds.getNorth()},${bounds.getEast()}`;
-    let query = `[out:json];node["highway"="bus_stop"](${bbox});out;`;
-    let url = `https://overpass-api.de/api/interpreter?data=${encodeURIComponent(query)}`;
+var map = L.map('map', {layers: [voyager, busStops_collect]}).setView([25.079696, 121.545240], 17); // 台北 101 的座標 & 新增layers
 
-    let response = await fetch(url);
-    let data = await response.json();
-    return data.elements;
-    
-}
-
-async function updateBusStops() {
-    let zoom = map.getZoom();
-   
-    if (zoom < MIN_ZOOM_TO_FETCH || map.hasLayer(busStops_collect) == false) {
-        busStops_collect.clearLayers();
-        return;
-    }
-
-    let busStops = await fetchBusStops();
-    var busIcon = L.icon({
-        iconUrl: 'bus.1014x1024.png', 
-        iconSize: [25, 25]
-    })
-    
-    busStops.forEach(stop => {
-        let marker = L.marker([stop.lat, stop.lon], {icon: busIcon, nodeID: stop.id})
-            .bindPopup((stop.tags.name || "公車站") + ("<br />路線處理中..."))
-
-            // 點擊事件
-            .on("click", async function(e) {
-
-                let clickedNodeID = marker.options.nodeID;
-                let routes = await getBusRoutes(clickedNodeID);
-                // 偵錯用
-                console.log("完整的 Overpass API 回應:", routes);
-                console.log("elements 的內容:", routes.elements);
-                console.log("elements 的類型:", typeof routes.elements);
-                if (!routes || !routes.elements) {
-                    console.error("API 沒有回傳 elements！請檢查 API 查詢條件或請求方式。");
-                } else {
-                    console.log("API 回傳成功，繼續處理資料...");
-                }
-                
-
-                let routeNames = routes.elements
-                .filter(element => element.type === "relation" && element.tags?.name) // 只篩選 relation
-                .map(relation => relation.tags?.name || "未知編號");
-                console.log(routeNames);
-                let PopupContent = (stop.tags.name || "公車站") + (`<br />經過的公車路線: <br /> `);
-                routeNames.forEach(routeName => {
-                    PopupContent += (`<a href="javascript:void(0);" onclick="routeDisplay('${routeName}')">${routeName}</a> <br />`);
-                });
-                marker.setPopupContent(PopupContent);
-                document.getElementById('busroutes_sidebar').innerHTML = `<h2>${stop.tags.name || "公車站"}</h2>` + PopupContent;
-                
-                // sidebar.show(panelContent.id);
-                marker.openPopup();
-            });
-            
-        busStops_collect.addLayer(marker);
-    });
-}
-
-
-
-let fetchTimeout;
-
-map.on("moveend", () => {
-    clearTimeout(fetchTimeout); // 清除上次的計時器
-    fetchTimeout = setTimeout(updateBusStops, 500); // 0.5 秒內只執行最後一次
-});
-
-updateBusStops();  // 初始化時加載公車站
+// 使用 Carto Positron 作為底圖
+/* L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/">CARTO</a>',
+    subdomains: 'abcd',
+    maxZoom: 20
+}).addTo(map); */
 
 

@@ -7,11 +7,13 @@ async function getBusRoutes(BusNode) {
         (._;>;);
         out geom;`;
     let url = `https://overpass-api.de/api/interpreter?data=${encodeURIComponent(query)}`;
-
+    console.log(BusNode);
     let response = await fetch(url);
     let data = await response.json();
     return data;// 一開始回傳element導致分析時發生element is undefined錯誤
 }
+
+
 
 async function routeDisplay(route_name) {
     console.log(route_name);
@@ -27,41 +29,45 @@ async function routeDisplay(route_name) {
     console.log(data);
     const Busroute_geojson_data = osmtogeojson(data);
     console.log(Busroute_geojson_data);
-    console.log(Busroute_geojson_data.features[0].name);
+    console.log(Busroute_geojson_data.features[0].properties.name);
     if (BusrouteLayer != null) {
         BusrouteLayer.clearLayers(); // 清除舊的圖層
     }
+    let busstop_sidestring = "";
+    let busstop_count = 1;
 
     BusrouteLayer = L.geoJSON(Busroute_geojson_data, {
         style: function (feature) {
             switch (feature.geometry.type) {
                 case 'MultiLineString':
+                case 'LineString':
                     return {
                         color: "blue",
                         weight: 3,
                         opacity: 0.7
 
                     };
-                case 'LineString':
-                        return {
-                            color: "red",
-                            weight: 3,
-                            opacity: 0.7
-                    };
-                
             }
         },
         pointToLayer: function (feature, latlng) {
             if (feature.geometry.type === 'Point') {
                 if (feature.properties && feature.properties.name) {
-                    let marker = new L.Marker(latlng).addTo(map);
+                    const alt_in_id = feature.properties.id.split('/');
+                    const alt_id = alt_in_id[1];
+                    let marker = new L.Marker(latlng, {nodeID: alt_id}).addTo(map);
+                    busstopMarkers[alt_id] = marker;
                     marker.bindPopup(feature.properties.name);
+                    busstop_sidestring += `<a href="javascript:void(0);" onclick="processPassBusRoutes('${marker.options.nodeID}', '${feature.properties.name}')">${busstop_count}. ${feature.properties.name}</a> <br />`;
+                    busstop_count += 1;
+                    /*marker.on('click', function () {
+                        setSidebarContent(feature.properties, busstop_sidestring);
+                    });*/
                     return marker;
                 };
             };
         }
     })
-    setSidebarContent(Busroute_geojson_data.features[0].properties);
+    setSidebarContent(Busroute_geojson_data.features[0].properties, busstop_sidestring);
     BusrouteLayer.addTo(map);
     map.fitBounds(BusrouteLayer.getBounds()); // 調整地圖視野以適應路線
 
@@ -76,11 +82,11 @@ async function routeDisplay(route_name) {
     }); */
 }
 
-async function setSidebarContent(Busroute_tags) {
+async function setSidebarContent(Busroute_tags, Busstop_names) {
     let sidebarContent = document.getElementById("sidebar-content");
     let sidebarTitle = document.getElementById("sidebar-title");
     sidebarTitle.innerHTML = Busroute_tags.name || "公車路線";
-    sidebarContent.innerHTML = `${Busroute_tags.network} ${Busroute_tags.operator} ${Busroute_tags.ref}<br /> From: ${Busroute_tags.from} <br /> To: ${Busroute_tags.to}`;   
+    sidebarContent.innerHTML = `${Busroute_tags.network} ${Busroute_tags.operator} ${Busroute_tags.ref}<br /> From: ${Busroute_tags.from} <br /> To: ${Busroute_tags.to} <br /> ${Busstop_names}`;   
     sidebar.open('businfo_sidebar');
     console.log("setSidebarContent");
 }

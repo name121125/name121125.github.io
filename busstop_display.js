@@ -50,6 +50,9 @@ async function updateBusStops() {
 async function processPassBusRoutes(marker_nodeID, stop_name) {
     let clickedNodeID = marker_nodeID;
     let clickedMarker = busstopMarkers[clickedNodeID];
+    document.getElementById('sidebar-content').innerHTML = (stop_name || "公車站") + ("<br />路線處理中...<br />") + (`<div class="spinner-border " role="status">
+  <span class="visually-hidden">Loading...</span>
+</div>`);
     
     let routes = await getBusRoutes(clickedNodeID);
     

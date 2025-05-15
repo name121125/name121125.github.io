@@ -19,11 +19,15 @@ var Positron = L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/
     subdomains: 'abcd',
     maxZoom: 20
 });
+var TaiwanMapTiles = L.tileLayer('https://wmts.nlsc.gov.tw/wmts/EMAP/default/GoogleMapsCompatible/{z}/{y}/{x}', {
+    attribution: '© <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
+});
 
 var baseMaps = {
     "Voyager": voyager, 
     "OpenStreetMap": osm, 
-    "Positron": Positron
+    "Positron": Positron, 
+    "TaiwanMapTiles": TaiwanMapTiles
 };
 
 var overlayMaps = {

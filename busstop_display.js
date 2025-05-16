@@ -50,10 +50,12 @@ async function updateBusStops() {
 async function processPassBusRoutes(marker_nodeID, stop_name) {
     let clickedNodeID = marker_nodeID;
     let clickedMarker = busstopMarkers[clickedNodeID];
+    document.getElementById('sidebar-title').innerHTML = (stop_name || "公車站");
     document.getElementById('sidebar-content').innerHTML = (stop_name || "公車站") + ("<br />路線處理中...<br />") + (`<div class="spinner-border " role="status">
   <span class="visually-hidden">Loading...</span>
 </div>`);
     
+    sidebar.open('businfo_sidebar');
     let routes = await getBusRoutes(clickedNodeID);
     
     // 偵錯用
@@ -78,7 +80,7 @@ async function processPassBusRoutes(marker_nodeID, stop_name) {
     });
     clickedMarker.setPopupContent(stop_name || "公車站");
     // marker在sidebar前調整才不會影響autopan
-    sidebar.open('businfo_sidebar');
+    
     // 在側邊欄顯示路線資訊
     document.getElementById('sidebar-title').innerHTML = (stop_name || "公車站");
     document.getElementById('sidebar-content').innerHTML = PopupContent;

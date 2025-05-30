@@ -49,10 +49,19 @@
                 <a class="nav-link disabled">Disabled</a>
               </li>
             </ul>
-            <form class="d-flex" id="search">
-              <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search">
+            <div class="d-flex">
+              <div class="search-container">
+                <!-- 搜尋欄位 -->
+                <form class="d-flex" id="search">
+                  <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search">
+                  <div class="suggestions-dropdown" id="suggestionsDropdown"></div>
+                </form>
+              </div>
               <button class="btn btn-outline-success" onclick="search()" type="button">Search</button>
-            </form>
+            </div>
+          </div>
+          <div>
+              <ul id="result-list" class="list-group mt-2"></ul>
           </div>
         </div>
       </nav>
@@ -66,8 +75,8 @@
     <script src="busstop_display.js"></script>
     <script>
       function search() {
-        let test = document.querySelector("#search input").value;
-        search_place(test);
+        let query = document.querySelector("#search input").value;
+        searchPlace(query);
       }
     </script>
 </body>

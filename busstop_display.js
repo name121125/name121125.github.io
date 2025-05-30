@@ -78,7 +78,7 @@ async function processPassBusRoutes(marker_nodeID, stop_name) {
         routeNames.forEach(routeName => {
         PopupContent += (`<a href="javascript:void(0);" onclick="routeDisplay('${routeName}')">${routeName}</a> <br />`);
     });
-    clickedMarker.setPopupContent(stop_name || "公車站");
+    // clickedMarker.setPopupContent(stop_name || "公車站");
     // marker在sidebar前調整才不會影響autopan
     
     // 在側邊欄顯示路線資訊

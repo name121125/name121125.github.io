@@ -34,6 +34,7 @@ async function routeDisplay(route_name) {
     if (BusrouteLayer != null) {
         BusrouteLayer.clearLayers(); // 清除舊的圖層
     }
+    
     let busstop_sidestring = "";
     let busstop_count = 1;
 
@@ -53,13 +54,16 @@ async function routeDisplay(route_name) {
         pointToLayer: function (feature, latlng) {
             if (feature.geometry.type === 'Point') {
                 if (feature.properties && feature.properties.name) {
+                    
+                    
                     const alt_in_id = feature.properties.id.split('/');
                     const alt_id = alt_in_id[1];
                     let marker = new L.Marker(latlng, {nodeID: alt_id}).addTo(map);
                     busstopMarkers[alt_id] = marker;
-                    
-                    busstop_sidestring += `<a href="javascript:void(0);" onclick="processPassBusRoutes('${marker.options.nodeID}', '${feature.properties.name}')">${busstop_count}. ${feature.properties.name}</a> <br />`;
-                    marker.bindPopup(busstop_sidestring);
+                    let busstop_markerstring = `<a href="javascript:void(0);" onclick="processPassBusRoutes('${marker.options.nodeID}', '${feature.properties.name}')">${busstop_count}. ${feature.properties.name}</a> <br />`;;
+                    busstop_sidestring += busstop_markerstring;
+                     
+                    marker.bindPopup(busstop_markerstring);
                     // marker.bindTooltip(feature.properties.name, { permanent: true, direction: 'top' });
                     busstop_count += 1;
                     /*marker.on('click', function () {
@@ -88,12 +92,15 @@ async function routeDisplay(route_name) {
 async function setSidebarContent(Busroute_tags, Busstop_names) {
     let sidebarContent = document.getElementById("sidebar-content");
     let sidebarTitle = document.getElementById("sidebar-title");
-    if (Busroute_tags == null) {
+    if (Busroute_tags === null) {
         sidebarTitle.innerHTML = `${Busstop_names}` || `公車站`;
         sidebarContent.innerHTML = `${Busstop_names} <br />路線處理中...<br /> <div class="spinner-border " role="status">`;
+    } else {
+        
+        sidebarTitle.innerHTML = Busroute_tags.name || `公車路線`;
+        sidebarContent.innerHTML = `${Busroute_tags.network} ${Busroute_tags.operator} ${Busroute_tags.ref}<br /> From: ${Busroute_tags.from} <br /> To: ${Busroute_tags.to} <br /> ${Busstop_names}`;   
+        sidebar.open('businfo_sidebar');
+        console.log("setSidebarContent");
     }
-    sidebarTitle.innerHTML = Busroute_tags.name || "公車路線"
-    sidebarContent.innerHTML = `${Busroute_tags.network} ${Busroute_tags.operator} ${Busroute_tags.ref}<br /> From: ${Busroute_tags.from} <br /> To: ${Busroute_tags.to} <br /> ${Busstop_names}`;   
-    sidebar.open('businfo_sidebar');
-    console.log("setSidebarContent");
+    
 }
